@@ -1,12 +1,48 @@
 {
   "source": "https://api.github.com/repos/WordPress/gutenberg/releases?per_page=50",
   "latest": {
-    "tag": "v22.3.0",
-    "name": "22.3.0",
-    "publishedAt": "2025-12-17T16:27:03Z",
-    "url": "https://github.com/WordPress/gutenberg/releases/tag/v22.3.0"
+    "tag": "v22.5.0",
+    "name": "22.5.0",
+    "publishedAt": "2026-02-04T14:28:15Z",
+    "url": "https://github.com/WordPress/gutenberg/releases/tag/v22.5.0"
   },
   "recent": [
+    {
+      "tag": "v22.5.0",
+      "name": "22.5.0",
+      "publishedAt": "2026-02-04T14:28:15Z",
+      "url": "https://github.com/WordPress/gutenberg/releases/tag/v22.5.0"
+    },
+    {
+      "tag": "v22.4.4",
+      "name": "22.4.4",
+      "publishedAt": "2026-02-04T13:06:04Z",
+      "url": "https://github.com/WordPress/gutenberg/releases/tag/v22.4.4"
+    },
+    {
+      "tag": "v22.4.3",
+      "name": "22.4.3",
+      "publishedAt": "2026-01-30T18:04:57Z",
+      "url": "https://github.com/WordPress/gutenberg/releases/tag/v22.4.3"
+    },
+    {
+      "tag": "v22.4.2",
+      "name": "22.4.2",
+      "publishedAt": "2026-01-28T10:50:47Z",
+      "url": "https://github.com/WordPress/gutenberg/releases/tag/v22.4.2"
+    },
+    {
+      "tag": "v22.4.1",
+      "name": "22.4.1",
+      "publishedAt": "2026-01-23T16:31:05Z",
+      "url": "https://github.com/WordPress/gutenberg/releases/tag/v22.4.1"
+    },
+    {
+      "tag": "v22.4.0",
+      "name": "22.4.0",
+      "publishedAt": "2026-01-20T14:08:58Z",
+      "url": "https://github.com/WordPress/gutenberg/releases/tag/v22.4.0"
+    },
     {
       "tag": "v22.3.0",
       "name": "22.3.0",
@@ -132,24 +168,6 @@
       "name": "20.9.0",
       "publishedAt": "2025-05-28T14:40:23Z",
       "url": "https://github.com/WordPress/gutenberg/releases/tag/v20.9.0"
-    },
-    {
-      "tag": "v20.8.0",
-      "name": "20.8.0",
-      "publishedAt": "2025-05-14T10:08:51Z",
-      "url": "https://github.com/WordPress/gutenberg/releases/tag/v20.8.0"
-    },
-    {
-      "tag": "v20.7.0",
-      "name": "20.7.0",
-      "publishedAt": "2025-04-22T11:44:36Z",
-      "url": "https://github.com/WordPress/gutenberg/releases/tag/v20.7.0"
-    },
-    {
-      "tag": "v20.6.0",
-      "name": "20.6.0",
-      "publishedAt": "2025-04-03T11:40:39Z",
-      "url": "https://github.com/WordPress/gutenberg/releases/tag/v20.6.0"
     }
   ]
 }
