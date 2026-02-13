@@ -1,0 +1,22 @@
+name: Deploy to Emichi
+
+on:
+  push:
+    branches:
+      - emichi
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            cd ~/agent-zero/vanja/usr/projects/wordpress_skills_dev
+            git pull origin emichi
+            bash deploy.sh ~/agent-zero/emichi/skills
+            echo "✓ agent-skills deployed to emichi successfully"
