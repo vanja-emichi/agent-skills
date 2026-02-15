@@ -538,3 +538,164 @@ server {
 - **Keep uploads gitignored** - use Docker volume or sync separately
 - **Disable WP_DEBUG_DISPLAY** in development.php for clean output
 - **agent-zero_default network** allows A0 containers to access WordPress
+
+---
+
+### Procedure 6: Full Database Sync (Dev → Prod)
+
+Sync the entire dev database to production with automatic URL replacement and cache flushing.
+
+#### When to Use
+- Deploying a complete dev environment to production
+- Resetting prod to match dev state (content, settings, everything)
+- Initial production deployment from a dev build
+
+#### Prerequisites
+- Dev containers (`wp-dev-app`, `wp-dev-db`) running and accessible via Docker
+- Prod container (`wp-prod-app`) running on VPS, accessible via SSH
+- SSH credentials configured (env vars or passed as arguments)
+- `sshpass` installed in the executing environment
+
+> **⚠️ WARNING:** This overwrites the **entire** production database. A backup is created automatically, but ensure you understand the implications.
+
+#### Step 1: Dry Run (Recommended First)
+```bash
+bash /a0/skills/wordpress-bedrock-setup/scripts/sync-db-full.sh \
+  --ssh-host=$SSH_HOSTNAME --ssh-user=$SSH_USERNAME --ssh-pass=$SSH_PASSWORD \
+  --dry-run
+```
+This shows what would happen without making any changes. URLs are auto-detected.
+
+#### Step 2: Execute Full Sync
+```bash
+bash /a0/skills/wordpress-bedrock-setup/scripts/sync-db-full.sh \
+  --ssh-host=$SSH_HOSTNAME --ssh-user=$SSH_USERNAME --ssh-pass=$SSH_PASSWORD \
+  --confirm
+```
+
+#### Step 3: Verify
+```bash
+sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_HOSTNAME \
+  "docker exec wp-prod-app wp option get blogname --path=/var/www/html/web/wp --allow-root"
+```
+
+#### Optional: Override Auto-detected URLs
+```bash
+bash /a0/skills/wordpress-bedrock-setup/scripts/sync-db-full.sh \
+  --ssh-host=$SSH_HOSTNAME --ssh-user=$SSH_USERNAME --ssh-pass=$SSH_PASSWORD \
+  --dev-url=https://dev.example.com:9002 \
+  --prod-url=https://prod.example.com \
+  --confirm
+```
+
+#### Script Features
+- Auto-detects dev URL from project `.env` (`WP_HOME`)
+- Auto-detects prod URL via `wp option get home` on prod
+- Creates automatic backup of prod DB before import
+- Performs `wp search-replace` across all tables
+- Flushes object cache, rewrite rules, and transients
+- Cleans up temporary files after completion
+
+---
+
+### Procedure 7: Selective Content Sync
+
+Sync specific posts or pages by ID from dev to prod, with URL replacement in content.
+
+#### When to Use
+- Deploying specific page/post content changes to production
+- Syncing a landing page or blog post after editing in dev
+- Pushing individual content updates without affecting the full database
+
+#### Prerequisites
+- Same as Procedure 6 (dev/prod containers, SSH access)
+- Know the post/page IDs to sync (find via WP admin or `wp post list`)
+
+> **⚠️ WARNING:** Existing posts with matching IDs on prod will be overwritten. Posts not found on prod will be created (possibly with a different ID).
+
+#### Step 1: Find Post IDs
+```bash
+# List pages on dev
+docker exec wp-dev-app wp post list --post_type=page --fields=ID,post_title,post_status \
+  --path=/var/www/html/web/wp --allow-root
+
+# List posts on dev
+docker exec wp-dev-app wp post list --post_type=post --fields=ID,post_title,post_status \
+  --path=/var/www/html/web/wp --allow-root
+```
+
+#### Step 2: Dry Run
+```bash
+bash /a0/skills/wordpress-bedrock-setup/scripts/sync-content-selective.sh \
+  --ids=442,524 \
+  --ssh-host=$SSH_HOSTNAME --ssh-user=$SSH_USERNAME --ssh-pass=$SSH_PASSWORD \
+  --dry-run
+```
+
+#### Step 3: Execute Sync
+```bash
+bash /a0/skills/wordpress-bedrock-setup/scripts/sync-content-selective.sh \
+  --ids=442,524 \
+  --ssh-host=$SSH_HOSTNAME --ssh-user=$SSH_USERNAME --ssh-pass=$SSH_PASSWORD
+```
+
+#### Script Features
+- Exports post title, status, type, slug, and full content
+- Replaces dev URLs with prod URLs in post content
+- Updates existing posts on prod or creates new ones
+- Transfers content via temp files to avoid shell escaping issues
+- Shows per-post summary with content length and URL replacement status
+
+---
+
+### Procedure 8: Media/Uploads Sync
+
+Sync media upload files between dev and prod using rsync over SSH.
+
+#### When to Use
+- Deploying uploaded media (images, documents) from dev to prod
+- Pulling prod media to dev for local development
+- Keeping uploads in sync after content changes
+
+#### Prerequisites
+- SSH access to the VPS (same credentials as other sync procedures)
+- `rsync` and `sshpass` installed in the executing environment
+- Dev uploads directory accessible at `<project>/web/app/uploads/`
+- Prod uploads at `<prod-server-path>/web/app/uploads/`
+
+#### Step 1: Dry Run (Dev → Prod)
+```bash
+bash /a0/skills/wordpress-bedrock-setup/scripts/sync-uploads.sh \
+  --ssh-host=$SSH_HOSTNAME --ssh-user=$SSH_USERNAME --ssh-pass=$SSH_PASSWORD \
+  --dry-run
+```
+
+#### Step 2: Execute Sync (Dev → Prod)
+```bash
+bash /a0/skills/wordpress-bedrock-setup/scripts/sync-uploads.sh \
+  --ssh-host=$SSH_HOSTNAME --ssh-user=$SSH_USERNAME --ssh-pass=$SSH_PASSWORD
+```
+
+#### Step 3: Pull Prod Media to Dev (Reverse Direction)
+```bash
+bash /a0/skills/wordpress-bedrock-setup/scripts/sync-uploads.sh \
+  --ssh-host=$SSH_HOSTNAME --ssh-user=$SSH_USERNAME --ssh-pass=$SSH_PASSWORD \
+  --direction=prod-to-dev
+```
+
+#### Script Features
+- Uses rsync for efficient incremental transfers
+- Supports both `dev-to-prod` (default) and `prod-to-dev` directions
+- Excludes `.gitkeep`, temp files, `.DS_Store`, `Thumbs.db`
+- Fixes file permissions (`www-data` ownership, 755/644) after sync
+- Shows file count and transfer summary
+
+---
+
+Files (use skills_tool method=read_file to open):
+/a0/skills/wordpress-bedrock-setup/
+├── scripts/
+│   ├── sync-db-full.sh
+│   ├── sync-content-selective.sh
+│   └── sync-uploads.sh
+└── SKILL.md
